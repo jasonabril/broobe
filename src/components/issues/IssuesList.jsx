@@ -1,86 +1,75 @@
-import React, { useEffect, useContext, useState } from "react";
-import axios from "axios";
-import { LoginContext } from "../login";
+import { useContext } from "react";
 import { Link } from "react-router-dom";
+import useIssues from "../../hooks/useIssues";
+import { LoginContext } from "../login";
 
 const IssuesList = () => {
-  const GETISSUES = "https://challenge.broobe.net/api/v1/issues";
-  const [data, setData] = useState([]);
-  const [isEmpty, setIsEmpty] = useState();
-  const { logged, token, id } = useContext(LoginContext);
-
-  const getIssues = async () => {
-    setIsEmpty(true);
-    try {
-      const response = await axios.get(GETISSUES, {
-        headers: { Authorization: "Bearer " + token },
-      });
-      const json = await response.data;
-      setData(json);
-      setTimeout(() => {
-        setIsEmpty(false);
-      }, 1500);
-      if (data && data.length === 0) {
-        setIsEmpty(true);
-      }
-    } catch (err) {
-      console.log({ err });
-    }
-  };
-  useEffect(() => {
-    logged && getIssues();
-  }, []);
-
+  const { issues, deleteIssue, priority, isLoading, Loading } = useIssues();
+  const { id } = useContext(LoginContext);
   return (
     <>
       <div className="container">
-        {isEmpty && (
+        {!issues && !isLoading ? (
           <>
             <div className="alert alert-warning" role="alert">
               Issues List is empty
             </div>
           </>
+        ) : (
+          isLoading && <img src={Loading} />
         )}
-        {!isEmpty && (
-          <table className="table table-hover">
-            <thead>
-              <tr>
-                <th scope="col">Id</th>
-                <th scope="col">Name</th>
-                <th scope="col">Description</th>
-                <th scope="col">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.map((el, index) => {
-                return (
-                  <tr key={el.id}>
-                    <th scope="row">{el.id}</th>
-                    <td>{el.name}</td>
-                    <td>{el.description}</td>
-                    <td>
-                      <Link
-                        to="/update"
-                        onClick={() => id(el.id)}
-                        className="btn btn-success mx-3 my-2"
-                      >
-                        Update
-                      </Link>
-                      <button className="btn btn-danger">Delete</button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+        {issues && !isLoading && (
+          <>
+            <table className="table table-hover">
+              <thead>
+                <tr>
+                  <th scope="col">Id</th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Description</th>
+                  <th scope="col">State</th>
+                  <th scope="col">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {issues.map((el) => {
+                  return (
+                    <tr key={el.id}>
+                      <th scope="row">{el.id}</th>
+                      <td>{el.name}</td>
+                      <td>{el.description}</td>
+                      {priority &&
+                        priority.map((element) => {
+                          return (
+                            element.id === el.priority_id && (
+                              <td key={el.id}>{element.type}</td>
+                            )
+                          );
+                        })}
+                      <td>
+                        <Link
+                          to="/update"
+                          onClick={() => id(el.id)}
+                          className="btn btn-success mx-3 my-2"
+                        >
+                          Update
+                        </Link>
+                        <button
+                          onClick={() => deleteIssue(el.id)}
+                          className="btn btn-danger"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+            <Link to="/createissue" className="btn btn-primary">
+              Create Issue
+            </Link>
+          </>
         )}
-        <Link
-          to="/createissue"
-          className="btn btn-primary"
-          // onClick={<Link to="/createissue" />}
-        >
-          Create Issue
-        </Link>
       </div>
     </>
   );

@@ -7,7 +7,7 @@ const Login = () => {
   const [form, setForm] = useState({ name: "", pass: "" });
   const [action, setAction] = useState(false);
   const [register, setRegister] = useState(false);
-  const { jwt, loading, error, session } = useLogin(form, action);
+  const { error } = useLogin(form, action);
 
   const checkForm = (e) => {
     e.preventDefault();
@@ -23,11 +23,9 @@ const Login = () => {
   }, [error]);
 
   useEffect(() => {
-    if (jwt.token && jwt.token.length > 0) {
-      localStorage.setItem("token", jwt.token.toString());
-      login();
-    }
-  }, [jwt]);
+    const token = localStorage.getItem("token");
+    token && login(token);
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

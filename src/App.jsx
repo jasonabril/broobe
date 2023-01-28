@@ -5,13 +5,11 @@ import "./App.css";
 
 function App() {
   return (
-    <div className="App">
-      <LoginProvider>
-        <MainLayout>
-          <Router />
-        </MainLayout>
-      </LoginProvider>
-    </div>
+    <LoginProvider>
+      <MainLayout>
+        <Router />
+      </MainLayout>
+    </LoginProvider>
   );
 }
 

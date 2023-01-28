@@ -1,9 +1,10 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
+import { LoginContext } from "../components/login";
 
 const useLogin = (user, action) => {
   const loginUrl = "https://challenge.broobe.net/api/v1/login";
-  const [jwt, setJwt] = useState("");
+  const [jwt, setJwt] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [params, setParams] = useState();
@@ -12,14 +13,16 @@ const useLogin = (user, action) => {
   const confirmLoginData = async () => {
     try {
       setLoading(true);
-      const response = await axios.post(loginUrl, params);
+      const response = await axios.post(loginUrl, params, {
+        headers: { "Access-Control-Allow-Origin": "*" },
+      });
       const json = await response.data;
+      localStorage.setItem("token", json.token.toString());
+      setJwt(json.token);
       setSession(true);
-      setJwt(json);
       setLoading(false);
-      setError("");
     } catch (err) {
-      setError(err.response.data);
+      setError(err);
     }
   };
 

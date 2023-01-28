@@ -1,22 +1,26 @@
 import { createContext, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const LoginContext = createContext();
 
 export const LoginProvider = ({ children }) => {
-  const [logged, setLogged] = useState(false);
+  const [logged, setLogged] = useState(null);
   const [token, setToken] = useState("");
   const [data, setData] = useState();
   const [priority, setPriority] = useState();
+  const navigate = useNavigate();
 
-  function logout() {
+  const logout = () => {
+    localStorage.clear();
+    navigate("/");
     setLogged(false);
-  }
+  };
 
-  function login() {
-    const jwt = sessionStorage.getItem("token");
-    setToken(jwt.toString());
+  const login = (jwt) => {
+    setToken(jwt);
+
     setLogged(true);
-  }
+  };
 
   const id = (obj) => {
     setData(obj);

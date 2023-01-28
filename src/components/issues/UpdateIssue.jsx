@@ -1,61 +1,15 @@
-import axios from "axios";
-import React, { useState, useContext, useEffect } from "react";
+import { useContext } from "react";
+import { Link } from "react-router-dom";
+import useIssues from "../../hooks/useIssues";
 import { LoginContext } from "../login";
 
 const UpdateIssue = () => {
-  const UPDATEISSUE = "https://challenge.broobe.net/api/v1/issues";
-  const [form, setForm] = useState();
-  const [isEmpty, setIsEmpty] = useState(false);
-  const [priorities, setPriorities] = useState([]);
-  const { priority, token, data } = useContext(LoginContext);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
-  };
-
-  const getIssueToUpdate = async (id) => {
-    console.log(id);
-    try {
-      const response = await axios.get(UPDATEISSUE + `?id=${id}`, {
-        headers: { Authorization: "Bearer " + token },
-      });
-      const json = await response.data;
-      // console.log(" en update", json);
-      json.map((el) => {
-        // console.log({ el });
-        return id === el.id && setForm(el);
-      });
-
-      console.log({ form });
-    } catch (error) {
-      console.log({ error });
-    }
-  };
-
-  useEffect(() => {
-    setTimeout(() => {
-      getIssueToUpdate(data);
-      setPriorities(priority);
-    }, 1000);
-  }, [data]);
-
-  const updateIssue = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await axios.patch(UPDATEISSUE, {
-        headers: { Authorization: "Bearer " + token },
-      });
-      const json = await response.data;
-      console.log(" en update", json);
-    } catch (error) {
-      console.log({ error });
-    }
-  };
+  const { form, handleInputChange, priority, updateIssue } = useIssues();
+  const { data } = useContext(LoginContext);
 
   return (
     <div className="d-flex justify-content-center mh-100">
-      {form && form.id === data && (
+      {priority && form && form.id === data && (
         <form name="login" method="post">
           <h1 className="mt-5 mb-3">Update Issue</h1>
 
@@ -91,29 +45,25 @@ const UpdateIssue = () => {
               onChange={handleInputChange}
               name="priority_id"
             >
-              <option defaultValue disabled>
-                Select one
-              </option>
-              {!isEmpty &&
-                priorities &&
-                priorities.map((el) => {
-                  return (
-                    form.priority_id === el.id && (
-                      <option key={el.id} value={el.id}>
-                        {el.type}
-                      </option>
-                    )
-                  );
-                })}
+              {priority.map((el) => {
+                return form.priority_id === el.id ? (
+                  <option selected key={el.id} value={form.priority_id}>
+                    {el.type}
+                  </option>
+                ) : (
+                  <option key={el.id} value={el.id}>
+                    {el.type}
+                  </option>
+                );
+              })}
             </select>
             <label>Priorities</label>
           </div>
 
           <div className="container my-3">
             <button
-              // disabled={waiting}
               className="row w-100 btn btn-success my-1"
-              onClick={updateIssue}
+              onClick={(e) => updateIssue(e, form)}
             >
               Update
             </button>
